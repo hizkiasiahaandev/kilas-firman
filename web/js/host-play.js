@@ -1,62 +1,59 @@
-document.addEventListener("DOMContentLoaded", () => {
-    loadRoomData();
+let room = null;
+
+document.addEventListener("DOMContentLoaded", async () => {
+    const params = new URLSearchParams(window.location.search);
+    const roomCode = params.get("room");
+    if (!roomCode) return (window.location.href = "host.html");
+
+    room = await eel.get_room_data(roomCode)();
+    if (!room) return (window.location.href = "host.html");
+
+    document.getElementById("roomNameDisplay").innerText = room.roomName;
+    document.getElementById("roomCodeDisplay").innerText = room.roomCode;
+    document.getElementById("hostNameDisplay").innerText = `Host: ${room.hostName}`;
+
+    loadParticipants();
+    setInterval(loadParticipants, 2000);
+    setInterval(checkRoomStatus, 2000);
 });
 
-function loadRoomData() {
-    const roomName = "Kuis IPS Kelas XII";
-    const roomCode = "482913";
-    const hostName = "Hizkia Pratama"; 
+async function loadParticipants() {
+    const users = await eel.get_participants(room.roomCode)() || [];
+    const listEl = document.getElementById("participantsList");
+    const countEl = document.getElementById("participantCount");
 
-    document.getElementById("roomNameDisplay").innerText = roomName;
-    document.getElementById("roomCodeDisplay").innerText = roomCode;
-    document.getElementById("hostNameDisplay").innerText = `Host: ${hostName}`;
+    countEl.innerText = users.length;
+    listEl.innerHTML = "";
 
-
-    const participants = [
-        { name: "Andi Saputra" },
-        { name: "Rika Amelia" },
-        { name: "Budi Santoso" },
-        { name: "Salsabila" },
-        { name: "Deni Rahman" },
-        { name: "Eka Putri" },
-        { name: "Fajar Nugraha" },
-        { name: "Gita Pertiwi" }
-    ];
-
-    renderParticipants(participants);
-}
-
-function renderParticipants(list) {
-    const listContainer = document.getElementById("participantsList");
-    const countBadge = document.getElementById("participantCount");
-
-    countBadge.innerText = list.length;
-    listContainer.innerHTML = "";
-
-    if (list.length === 0) {
-        listContainer.innerHTML = `
-        <div style="text-align:center; padding:20px; color:var(--text-muted);">
-            Belum ada peserta bergabung.
-        </div>`;
+    if (users.length === 0) {
+        listEl.innerHTML = `
+            <div style="padding:20px; text-align:center; color:var(--text-muted);">
+                Belum ada peserta bergabung.
+            </div>`;
         return;
     }
 
-    list.forEach(p => {
-        const initial = p.name.charAt(0).toUpperCase();
-        const itemHtml = `
+    users.forEach(p => {
+        const initial = p.participantName.charAt(0).toUpperCase();
+        listEl.innerHTML += `
             <div class="p-item">
                 <div class="p-name">
                     <div class="p-avatar">${initial}</div>
-                    ${p.name}
+                    ${p.participantName}
                 </div>
-            </div>
-        `;
-        listContainer.innerHTML += itemHtml;
+            </div>`;
     });
 }
 
-function endSession() {
-    if (confirm("Apakah Anda yakin ingin mengakhiri sesi kuis ini?")) {
-        window.location.href = "result-host.html";
+async function checkRoomStatus() {
+    const status = await eel.get_room_status(room.roomCode)();
+    if (status === "finished") {
+        window.location.href = `index.html`;
     }
+}
+
+async function endSession() {
+    if (!confirm("Akhiri sesi kuis untuk semua peserta?")) return;
+    await eel.finish_quiz(room.roomCode)();
+    window.location.href = `index.html`;
 }

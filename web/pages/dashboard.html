@@ -19,7 +19,6 @@
     <!-- Dashboard CSS -->
     <link rel="stylesheet" href="../css/dashboard.css">
 
-    <script src="../js/loadNavbar.js" defer></script>
 </head>
 
 <body>
@@ -101,7 +100,7 @@
                             <div class="action-icon"><i class="fa-solid fa-play"></i></div>
                             <div>
                                 <h3 class="action-title">Mulai Kuis</h3>
-                                <p class="action-desc">Minimal harus ada satu peserta</p>
+                                <p class="action-desc">Minimal harus ada satu</p>
                             </div>
                         </button>
 
@@ -112,42 +111,26 @@
             </main>
 
             <aside class="sidebar">
-
-                <div class="card sidebar-card">
-                    <div class="stat-box">
-                        <div class="stat-circle-icon">
-                            <i class="fa-solid fa-user-group"></i>
-                        </div>
-                        <div class="stat-text">
-                            <h4>0</h4>
-                            <span>Total Peserta</span>
-                        </div>
-                    </div>
-                </div>
-
                 <div class="card sidebar-card">
                     <h4 class="stat-label" style="margin-bottom:12px;">Status Room</h4>
                     <div style="display:flex; align-items:center; gap:10px;">
                         <span class="status-dot"></span>
                         <span class="status-text">Menunggu Soal</span>
                     </div>
-                    <p class="sidebar-desc">
-                        Room belum bisa diakses peserta sampai soal dibuat.
-                    </p>
                 </div>
 
                 <div class="tip-panel">
                     <div class="tip-title"><i class="fa-regular fa-lightbulb"></i> Tips</div>
                     <p class="tip-content">Simpan kode room agar mudah diberikan ke peserta.</p>
                 </div>
-
             </aside>
 
         </div>
     </div>
+    <script src="/eel.js"></script>
     <script src="../js/session.js"></script>
     <script src="../js/dashboard.js"></script>
-
+    <script src="../js/loadNavbar.js" defer></script>
 </body>
 
 </html>

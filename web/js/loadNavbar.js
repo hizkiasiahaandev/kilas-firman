@@ -1,14 +1,33 @@
-document.addEventListener("DOMContentLoaded", () => {
+document.addEventListener("DOMContentLoaded", async () => {
     const placeholder = document.getElementById("navbar-placeholder");
 
-    fetch("navbar.html")
-        .then(res => res.text())
-        .then(html => {
-            placeholder.innerHTML = html;
-        })
-        .catch(err => console.error("Error loading navbar:", err));
+    const res = await fetch("navbar.html");
+    const html = await res.text();
+    placeholder.innerHTML = html;
+
+    console.log("NAVBAR LOADED ✔");
+
+    if (typeof eel !== "undefined") updateNavbarSession();
 });
+async function updateNavbarSession() {
+    const navRight = document.getElementById("nav-right");
+    if (!navRight) return;
 
-function updateNavbarSession() {}
+    const user = await eel.get_current_user(SESSION_ID)();
+    if (user) {
+        navRight.innerHTML = `
+    <span class="nav-username">
+        <i class="fa-solid fa-user"></i>
+        ${user.username}
+    </span>
+    <button class="nav-outline" onclick="logout()">Logout</button>
+`;
 
-function logoutUser() {}
+    }
+}
+
+
+async function logout() {
+    await eel.logout(SESSION_ID)();
+    window.location.href = "../pages/index.html";
+}
