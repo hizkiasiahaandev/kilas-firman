@@ -8,10 +8,7 @@ def create_room(roomCode, roomName, hostName, mode, totalQuestions):
     try:
         mapped_mode = "random" if mode.lower() == "acak" else "ordered"
         cursor.execute(
-            """
-            INSERT INTO rooms (roomCode, roomName, hostName, mode, totalQuestions)
-            VALUES (%s, %s, %s, %s, %s)
-            """,
+            "INSERT INTO rooms (roomCode, roomName, hostName, mode, totalQuestions) VALUES (%s, %s, %s, %s, %s)",
             (roomCode, roomName, hostName, mapped_mode, totalQuestions)
         )
         conn.commit()
@@ -31,8 +28,7 @@ def get_room_data(roomCode):
         cursor.execute("SELECT * FROM rooms WHERE roomCode = %s", (roomCode,))
         room = cursor.fetchone()
         return room if room else None
-    except Exception as err:
-        print(err)
+    except:
         return None
     finally:
         cursor.close()
@@ -44,16 +40,12 @@ def add_participant(roomCode, participantName):
     conn = get_db()
     cursor = conn.cursor()
     try:
-        cursor.execute(
-            """
-            INSERT INTO participants (roomCode, participantName)
-            VALUES (%s, %s)
-            """,
-            (roomCode, participantName)
-        )
+        cursor.execute("INSERT INTO participants (roomCode, participantName) VALUES (%s, %s)", (roomCode, participantName))
         conn.commit()
         return {"success": True}
     except Exception as err:
+        if "Duplicate entry" in str(err):
+            return {"success": False, "message": "Nama sudah digunakan di room ini"}
         return {"success": False, "message": str(err)}
     finally:
         cursor.close()
@@ -66,10 +58,8 @@ def get_participants(roomCode):
     cursor = conn.cursor(dictionary=True)
     try:
         cursor.execute("SELECT * FROM participants WHERE roomCode = %s", (roomCode,))
-        users = cursor.fetchall()
-        return users
-    except Exception as err:
-        print(err)
+        return cursor.fetchall()
+    except:
         return []
     finally:
         cursor.close()
@@ -118,20 +108,21 @@ def start_quiz(roomCode):
 
 
 @eel.expose
-def save_result(roomCode, participantName, score, correct, totalQuestions, accuracy):
-    conn = get_db(); c = conn.cursor()
+def save_result(roomCode, participantName, score, correct, wrong):
+    conn = get_db()
+    cursor = conn.cursor()
     try:
-        c.execute(
-            "INSERT INTO results (roomCode, participantName, score, correct, totalQuestions, accuracy) VALUES (%s,%s,%s,%s,%s,%s)",
-            (roomCode, participantName, score, correct, totalQuestions, accuracy)
+        cursor.execute(
+            "INSERT INTO results (roomCode, participantName, score, correct, wrong) VALUES (%s, %s, %s, %s, %s)",
+            (roomCode, participantName, score, correct, wrong)
         )
         conn.commit()
         return {"success": True}
     except Exception as err:
         return {"success": False, "message": str(err)}
     finally:
-        c.close(); conn.close()
-
+        cursor.close()
+        conn.close()
 
 
 @eel.expose
@@ -150,20 +141,17 @@ def finish_quiz(roomCode):
 
 
 @eel.expose
-def submit_score(roomCode, participantName, score, correct, wrong):
+def get_leaderboard(roomCode):
     conn = get_db()
-    cursor = conn.cursor()
+    cursor = conn.cursor(dictionary=True)
     try:
         cursor.execute(
-            "UPDATE participants SET score=%s, correct=%s, wrong=%s WHERE roomCode=%s AND participantName=%s",
-            (score, correct, wrong, roomCode, participantName)
+            "SELECT participantName AS name, score FROM results WHERE roomCode = %s ORDER BY score DESC",
+            (roomCode,)
         )
-        conn.commit()
-        return {"success": True}
-    except Exception as err:
-        return {"success": False, "message": str(err)}
+        return cursor.fetchall()
+    except:
+        return []
     finally:
         cursor.close()
         conn.close()
-
-
