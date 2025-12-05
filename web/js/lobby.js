@@ -7,7 +7,8 @@ document.addEventListener("DOMContentLoaded", async () => {
     const params = new URLSearchParams(window.location.search);
     const roomCode = params.get("room");
 
-    participant = JSON.parse(localStorage.getItem("kilas_participant"));
+  
+    participant = JSON.parse(localStorage.getItem(`kilas_participant_${roomCode}`));
     if (!participant) {
         alert("Data peserta hilang, silakan join ulang");
         return window.location.href = "join.html";
@@ -52,11 +53,9 @@ async function loadParticipants() {
 
 async function checkStart() {
     const status = await eel.get_room_status(room.roomCode)();
-
     if (status === "started" && quizStartedAlertShown === false) {
         quizStartedAlertShown = true;
         document.getElementById("statusText").innerText = "Kuis Dimulai!";
-
         alert("Kuis dimulai! Siap-siap menjawab pertanyaan!");
         setTimeout(() => {
             window.location.href = `public-play.html?room=${room.roomCode}`;
@@ -64,9 +63,10 @@ async function checkStart() {
     }
 }
 
-
 function confirmExit() {
     if (!confirm("Yakin mau keluar dari room?")) return;
-    localStorage.removeItem("kilas_participant");
+    const params = new URLSearchParams(window.location.search);
+    const roomCode = params.get("room");
+    localStorage.removeItem(`kilas_participant_${roomCode}`);
     window.location.href = "join.html";
 }

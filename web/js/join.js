@@ -15,9 +15,7 @@ async function handleJoin(e) {
         return;
     }
 
-    // ambil data room
     const room = await eel.get_room_data(code)();
-    console.log("ROOM:", room);
     if (!room) {
         alert("Kode room tidak ditemukan");
         btn.disabled = false;
@@ -25,11 +23,7 @@ async function handleJoin(e) {
         return;
     }
 
-    // tambah peserta
     const status = await eel.add_participant(code, name)();
-    console.log("STATUS PYTHON:", status);
-
-    // 🔥 ini fix utama — tidak akan pernah alert undefined lagi
     if (!status || status.success !== true) {
         const msg = status?.message || "Gagal bergabung ke room";
         alert(msg);
@@ -38,13 +32,19 @@ async function handleJoin(e) {
         return;
     }
 
-    // simpan participant
-    const participant = {
-        name,
-        roomCode: code,
-        joinedAt: Date.now()
-    };
-    localStorage.setItem("kilas_participant", JSON.stringify(participant));
+    // 🔥 ambil data peserta dari database (100% akurat)
+    const participants = await eel.get_participants(code)();
+    const user = participants.find(p => p.participantName === name);
+
+    if (!user) {
+        alert("Gagal memvalidasi peserta dari server!");
+        return;
+    }
+
+    localStorage.setItem(`kilas_participant_${code}`, JSON.stringify({
+        name: user.participantName,
+        roomCode: code
+    }));
 
     alert("Berhasil bergabung!");
     window.location.href = `lobby.html?room=${code}`;

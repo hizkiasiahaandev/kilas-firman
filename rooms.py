@@ -139,19 +139,118 @@ def finish_quiz(roomCode):
         cursor.close()
         conn.close()
 
-
 @eel.expose
 def get_leaderboard(roomCode):
     conn = get_db()
     cursor = conn.cursor(dictionary=True)
     try:
         cursor.execute(
-            "SELECT participantName AS name, score FROM results WHERE roomCode = %s ORDER BY score DESC",
+            """
+            SELECT participantName AS name, score, correct, wrong
+            FROM results
+            WHERE roomCode = %s
+            ORDER BY score DESC
+            LIMIT 25
+            """,
             (roomCode,)
         )
         return cursor.fetchall()
-    except:
+    except Exception as err:
+        print("Leaderboard error:", err)
         return []
     finally:
         cursor.close()
         conn.close()
+
+
+
+
+@eel.expose
+def submit_answer(roomCode, participantName, qId, isCorrect, qScore):
+    conn = get_db()
+    cursor = conn.cursor()
+    try:
+        cursor.execute(
+            "INSERT INTO answers (roomCode, participantName, qId, isCorrect, qScore) VALUES (%s, %s, %s, %s, %s)",
+            (roomCode, participantName, qId, isCorrect, qScore)
+        )
+        conn.commit()
+        return {"success": True}
+    except Exception as err:
+        return {"success": False, "message": str(err)}
+    finally:
+        cursor.close()
+        conn.close()
+
+
+@eel.expose
+def calculate_result(roomCode, participantName):
+    conn = get_db()
+    cursor = conn.cursor(dictionary=True)
+    try:
+        cursor.execute("""
+            SELECT qScore, isCorrect
+            FROM answers
+            WHERE roomCode = %s AND participantName = %s
+        """, (roomCode, participantName))
+        data = cursor.fetchall()
+
+        total_questions = len(data)
+        correct = sum(1 for d in data if d["isCorrect"] == 1)
+        wrong   = total_questions - correct
+        score   = sum(d["qScore"] for d in data if d["isCorrect"] == 1)
+
+        return {
+            "total": total_questions,
+            "correct": correct,
+            "wrong": wrong,
+            "score": score,
+            "accuracy": round((correct / total_questions) * 100) if total_questions > 0 else 0
+        }
+    except Exception as err:
+        return {"success": False, "message": str(err)}
+    finally:
+        cursor.close()
+        conn.close()
+
+@eel.expose
+def finalize_result(roomCode, participantName):
+    result = calculate_result(roomCode, participantName)
+    conn = get_db()
+    cursor = conn.cursor()
+
+    try:
+        cursor.execute(
+            "SELECT id FROM results WHERE roomCode = %s AND participantName = %s",
+            (roomCode, participantName)
+        )
+        existing = cursor.fetchone()
+
+        if not existing:
+            cursor.execute(
+                "INSERT INTO results (roomCode, participantName, score, correct, wrong) VALUES (%s, %s, %s, %s, %s)",
+                (roomCode, participantName, result["score"], result["correct"], result["wrong"])
+            )
+            conn.commit()
+
+        return result
+    except Exception as err:
+        return {"success": False, "message": str(err)}
+    finally:
+        cursor.close()
+        conn.close()
+
+
+
+@eel.expose
+def has_answer(roomCode, participantName, qId):
+    conn = get_db()
+    cursor = conn.cursor()
+    cursor.execute(
+        "SELECT id FROM answers WHERE roomCode = %s AND participantName = %s AND qId = %s LIMIT 1",
+        (roomCode, participantName, qId)
+    )
+    row = cursor.fetchone()
+    cursor.close()
+    conn.close()
+    return row is not None

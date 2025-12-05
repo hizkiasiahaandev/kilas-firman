@@ -40,10 +40,18 @@ document.addEventListener("DOMContentLoaded", async () => {
     questionStatus.textContent = `${totalCreated} dari ${room.totalQuestions}`;
     progressBar.style.width = `${(totalCreated / room.totalQuestions) * 100}%`;
 
-    const createdTime = new Date(room.createdAt);
-    const now = new Date();
-    const diff = Math.floor((now - createdTime) / 1000);
-    timeCreatedEl.textContent = diff < 60 ? "Baru saja" : createdTime.toLocaleString();
+    const createdTime = room.createdAt
+        ? new Date(room.createdAt.replace(" ", "T"))
+        : null;
+
+    if (!createdTime) {
+        timeCreatedEl.textContent = "Baru dibuat";
+    } else {
+        const now = new Date();
+        const diff = Math.floor((now - createdTime) / 1000);
+        timeCreatedEl.textContent = diff < 60 ? "Baru saja" : createdTime.toLocaleString();
+    }
+
 
     createQuestionLink.href = `create-questions.html?room=${room.roomCode}`;
 

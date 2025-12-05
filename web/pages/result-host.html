@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="id">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hasil Akhir - KILAS Quiz</title>
+
+    <!-- Font -->
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap"
+        rel="stylesheet">
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Result Page CSS -->
+    <link rel="stylesheet" href="../css/result-host.css">
+</head>
+
+<body>
+
+    <div class="bg-shape shape-1"></div>
+    <div class="bg-shape shape-2"></div>
+
+    <div class="result-container">
+        <header class="header">
+            <h1>Hasil Akhir Kuis</h1>
+            <p class="subtitle-quiz"></p>
+        </header>
+
+        <section class="podium-wrapper">
+            <!-- Rank 2 -->
+            <div class="podium-item rank-2">
+                <div class="avatar-box">
+                    <div class="avatar" style="background:#64748b;"></div>
+                    <div class="rank-badge">2</div>
+                </div>
+                <div class="podium-base">
+                    <div class="winner-name"></div>
+                    <div class="winner-score"></div>
+                </div>
+            </div>
+
+            <!-- Rank 1 -->
+            <div class="podium-item rank-1">
+                <div class="avatar-box">
+                    <div class="avatar" style="background:#f59e0b; font-size:32px;">
+                        <i class="fa-solid fa-crown"></i>
+                    </div>
+                    <div class="rank-badge">1</div>
+                </div>
+                <div class="podium-base">
+                    <div class="winner-name"></div>
+                    <div class="winner-score"></div>
+                </div>
+            </div>
+
+            <!-- Rank 3 -->
+            <div class="podium-item rank-3">
+                <div class="avatar-box">
+                    <div class="avatar" style="background:#b45309;"></div>
+                    <div class="rank-badge">3</div>
+                </div>
+                <div class="podium-base">
+                    <div class="winner-name"></div>
+                    <div class="winner-score"></div>
+                </div>
+            </div>
+        </section>
+
+
+
+        <section class="ranking-card">
+            <h3 style="margin-bottom:20px; font-size:20px;">Detail Peringkat</h3>
+            <div class="table-container">
+                <table class="rank-table" id="rankingTable">
+                    <thead>
+                        <tr>
+                            <th class="rank-col">#</th>
+                            <th>Nama Peserta</th>
+                            <th>Skor Akhir</th>
+                            <th>Benar</th>
+                            <th>Salah</th>
+                        </tr>
+                    </thead>
+
+
+                    <tbody></tbody>
+                </table>
+            </div>
+        </section>
+
+        <div class="footer-actions">
+            <button class="btn-action btn-outline" onclick="window.location.href='dashboard.html'">
+                <i class="fa-solid fa-house"></i> Kembali ke Dashboard
+            </button>
+            <button class="btn-action btn-primary" onclick="window.location.href='lobby.html'">
+                <i class="fa-solid fa-rotate-right"></i> Mainkan Lagi
+            </button>
+        </div>
+    </div>
+
+    <script src="/eel.js"></script>
+    <script src="../js/session.js"></script>
+    <script src="../js/result-admin.js"></script>
+</body>
+
+</html>

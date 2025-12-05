@@ -48,12 +48,13 @@ async function loadParticipants() {
 async function checkRoomStatus() {
     const status = await eel.get_room_status(room.roomCode)();
     if (status === "finished") {
-        window.location.href = `index.html`;
+        window.location.href = `result-host.html?room=${room.roomCode}`;
     }
 }
+
 
 async function endSession() {
     if (!confirm("Akhiri sesi kuis untuk semua peserta?")) return;
     await eel.finish_quiz(room.roomCode)();
-    window.location.href = `index.html`;
+    window.location.href = `result-host.html?room=${room.roomCode}`;
 }
